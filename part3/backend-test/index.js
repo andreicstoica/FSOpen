@@ -1,6 +1,6 @@
 const express = require('express')
-const app = express()
 const cors = require('cors')
+const app = express()
 
 let notes = [
   {
@@ -20,6 +20,19 @@ let notes = [
   }
 ]
 
+let persons = [
+  {
+    "id": 1,
+    "name": "Arto Hellas",
+    "number": "040-123456"
+  },
+  {
+    "id": 2,
+    "name": "Ada Lovelace",
+    "number": "39-44-5323523"
+  }
+]
+
 const requestLogger = (request, response, next) => {
   console.log('Method:', request.method)
   console.log('Path:  ', request.path)
@@ -28,7 +41,6 @@ const requestLogger = (request, response, next) => {
   next()
 }
 
-/* MIDDLEWARES */
 app.use(cors())
 app.use(express.json())
 app.use(requestLogger)
@@ -46,7 +58,7 @@ app.get('/api/notes', (request, response) => {
   response.json(notes)
 })
 
-const generateId = () => {
+const generateNotesId = () => {
   const maxId = notes.length > 0
     ? Math.max(...notes.map(n => n.id))
     : 0
@@ -65,7 +77,7 @@ app.post('/api/notes', (request, response) => {
   const note = {
     content: body.content,
     important: body.important || false,
-    id: generateId(),
+    id: generateNotesId(),
   }
 
   notes = notes.concat(note)
@@ -87,6 +99,49 @@ app.get('/api/notes/:id', (request, response) => {
 app.delete('/api/notes/:id', (request, response) => {
   const id = Number(request.params.id)
   notes = notes.filter(note => note.id !== id)
+
+  response.status(204).end()
+})
+
+/* PHONEBOOK */
+const generatePersonsId = () => {
+  const maxId = persons.length > 0
+    ? Math.max(...persons.map(n => n.id))
+    : 0
+  return maxId + 1
+}
+
+app.get('/api/persons', (request, response) => {
+  response.json(persons)
+})
+
+app.post('/api/persons', (request, response) => {
+  const body = request.body
+
+  const person = {
+    name: body.name,
+    number: body.number,
+    id: generatePersonsId(),
+  }
+  persons = notes.concat(person)
+
+  response.json(person)
+})
+
+app.get('/api/persons/:id', (request, response) => {
+  const id = Number(request.params.id)
+  const person = persons.find(person => person.id === id)
+  if (person) {
+    response.json(person)
+  } else {
+    console.log('Person not found')
+    response.status(404).end()
+  }
+})
+
+app.delete('/api/persons/:id', (request, response) => {
+  const id = Number(request.params.id)
+  persons = persons.filter(person => person.id !== id)
 
   response.status(204).end()
 })
