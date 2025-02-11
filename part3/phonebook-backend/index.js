@@ -1,7 +1,5 @@
 const express = require('express')
-const cors = require('cors')
 const app = express()
-app.use(cors())
 
 let persons = [
   {
@@ -24,10 +22,12 @@ const requestLogger = (request, response, next) => {
   next()
 }
 
+/* MIDDLEWARES */
+app.use(express.static('dist'))
+const cors = require('cors')
 app.use(cors())
 app.use(express.json())
 app.use(requestLogger)
-app.use(express.static('dist'))
 
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
